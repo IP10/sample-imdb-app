@@ -49,4 +49,4 @@ __Steps__
 (or)
 https://sample-imdb.herokuapp.com/swagger/api-doc/
 
-*Scalability Writeup:* https://docs.google.com/document/d/11KQt-aRv1sHj65XmzxMM4bR7BfXGfQtboXHdf7IrjSU/edit?usp=sharing
+*Scalability Writeup:* https://drive.google.com/file/d/1M8m-Z5tgjg8A63r6thxw0yhNKlQjsKXU/view?usp=sharing
