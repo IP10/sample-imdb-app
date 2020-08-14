@@ -14,7 +14,7 @@ class Command(BaseCommand):
 	setup_path = os.path.abspath(os.path.dirname(__file__)) + '/setup/'
 	help = 'Builds the IMDB pre-defined data\n' \
 	       'Process List:\n\r' \
-	       '1 - setup_profile_images\n\r' \
+	       '1 - setup_movies\n\r' \
 	       '2 - setup_admin_user\n\r' \
 	       '3 - self.setup_oauth_application'
 	
