@@ -1,0 +1,746 @@
+openapi: 3.0.1
+info:
+  title: IMDB Sample App APIDocs
+  description: API Docs for IMDB Sample App
+  version: 1.0.0
+servers:
+- url: http://0.0.0.0:8000/api
+  description: development
+- url: https://sample-imdb.herokuapp.com/api
+  description: staging
+tags:
+- name: Common
+  description: Common API List
+- name: User
+  description: User API List
+- name: Movie
+  description: Movie API List
+paths:
+  /:
+    get:
+      tags:
+        - Common
+      summary: Health Check
+      description: Health Check API - When we deployed the production server or staging
+        server, we need to check whether the server is running or not. For this purpose,
+        we will use this API.
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/empty-success'
+  /users/login/:
+    post:
+      tags:
+        - User
+      summary: User Login
+      requestBody:
+        description: Password must be encoded in base64. Use this url to encode https://www.base64encode.net/
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user-login'
+      responses:
+        200:
+          description: failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/login-response'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-credentials'
+                  - $ref: '#/components/schemas/internal-server-error'
+  /users/logout/:
+    delete:
+      tags:
+       - User
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/empty-success'
+        "400":
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internal-server-error'
+  /users/:
+    get:
+      security:
+      - Bearer: []
+      tags:
+        - User
+      parameters:
+        - in: query
+          name: page_size
+          required: true
+          description: default 10 rows per page
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: true
+          description: default page number 1
+          schema:
+            type: integer
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users-list'
+        400:
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internal-server-error'
+    post:
+      security:
+      - Bearer: []
+      tags:
+       - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create-user'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+                  - $ref: '#/components/schemas/validation-failed'
+  /users/{id}:
+    get:
+      security:
+      - Bearer: []
+      tags:
+        - User
+      description: Get details of a user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: User id
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+    put:
+      security:
+      - Bearer: []
+      tags:
+        - User
+      description: update the user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: User id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user-update'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+                  - $ref: '#/components/schemas/validation-failed'
+    delete:
+      security:
+      - Bearer: []
+      tags:
+        - User
+      description: Delete the user(Soft delete)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: user id
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/empty-success'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+  /movies/genres/:
+    get:
+      tags:
+       - Movie
+      description: To get the genres list which will be used in the filter option for movies list API
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/genres-list'
+        400:
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internal-server-error'
+  /movies/directors/:
+    get:
+      tags:
+       - Movie
+      description: To get the directors list which will be used in the filter option for movies list API
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/directors-list'
+        400:
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internal-server-error'
+  /movies/:
+    get:
+      security:
+      - Bearer: []
+      tags:
+        - Movie
+      description: To get the movies list
+      parameters:
+        - in: query
+          name: page_size
+          required: true
+          description: default 10 rows per page
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: true
+          description: default page number - 1
+          schema:
+            type: integer
+        - in: query
+          name: sort_key
+          required: false
+          schema:
+            type: string
+            enum:
+              - POPULARITY
+              - IMDB_SCORE
+        - in: query
+          name: sort_by
+          required: false
+          description: Required if sort key is provided
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: filter_by
+          required: false
+          description: filter by either genre/director.
+          schema:
+            type: string
+            enum:
+              - genre
+              - director
+        - in: query
+          name: filter_key
+          required: false
+          description: Use movies/genres/ and movies/directors/ for genres and director respectively
+          schema:
+            type: string
+        - in: query
+          name: search_key
+          required: false
+          description: Search the movies list based on movie name(incase-sensitive)
+          schema:
+            type: string
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movies-list'
+        400:
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internal-server-error'
+    post:
+      security:
+      - Bearer: []
+      tags:
+       - Movie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create-movie'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+                  - $ref: '#/components/schemas/validation-failed'
+  /movies/{id}:
+    get:
+      security:
+      - Bearer: []
+      tags:
+        - Movie
+      description: Get details of a Movie
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Movie id
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+    put:
+      security:
+      - Bearer: []
+      tags:
+        - Movie
+      description: update the movie details
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: movie id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie-update'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie-detail'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+                  - $ref: '#/components/schemas/validation-failed'
+    delete:
+      security:
+      - Bearer: []
+      tags:
+        - Movie
+      description: Delete the movie
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: movie id
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/empty-success'
+        400:
+          description: failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/invalid-parameter'
+                  - $ref: '#/components/schemas/internal-server-error'
+                  - $ref: '#/components/schemas/unauthorized-access'
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Bearer {Access Token}
+  schemas:
+    empty-success:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+    user-login:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    login-response:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            token:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+                token_type:
+                  type: string
+                scope:
+                  type: string
+                expires_in:
+                  type: integer
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+    validation-failed:
+      type: object
+      properties:
+        status:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+        errors:
+          type: object
+    invalid-parameter:
+      type: object
+      properties:
+        status:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+    internal-server-error:
+      type: object
+      properties:
+        status:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+    unauthorized-access:
+      type: object
+      properties:
+        status:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+    invalid-credentials:
+      type: object
+      properties:
+        status:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+    users-list:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            users:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+            page:
+              type: object
+              properties:
+                current:
+                  type: integer
+                total:
+                  type: integer
+    user-detail:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            first_name:
+              type: string
+            last_name:
+              type: string
+            username:
+              type: string
+            email:
+              type: string
+    user-update:
+      type: object
+      properties:
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+    genres-list:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            genres:
+              type: array
+              items:
+                type: string
+    directors-list:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            directors:
+              type: array
+              items:
+                type: string
+    movies-list:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            movies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  director:
+                    type: string
+                  popularity:
+                    type: integer
+                  imdb_score:
+                    type: integer
+                  genres:
+                    type: array
+                    items:
+                      type: string
+            page:
+              type: object
+              properties:
+                current:
+                  type: integer
+                total:
+                  type: integer
+    movie-detail:
+      type: object
+      properties:
+        movie:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            director:
+              type: string
+            popularity:
+              type: integer
+            imdb_score:
+              type: integer
+            genres:
+              type: array
+              items:
+                type: string
+    movie-update:
+      type: object
+      properties:
+        movie:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            director:
+              type: string
+            popularity:
+              type: integer
+            imdb_score:
+              type: integer
+            genres:
+              type: array
+              items:
+                type: string
+    create-user:
+      type: object
+      properties:
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    create-movie:
+      type: object
+      properties:
+        name:
+          type: string
+        director:
+          type: string
+        popularity:
+          type: number
+        imdb_score:
+          type: number
+        genres:
+          type: array
+          items:
+            type: string
