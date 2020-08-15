@@ -134,7 +134,7 @@ class LogOutView(views.APIView):
 	def delete(self, request):
 		try:
 			logout(request)
-			return Utils.dispatch_success(request)
+			return Utils.dispatch_success(request,{})
 		except Exception as e:
 			print(e)
 			return Utils.dispatch_failure(request, ErrorMessage.INTERNAL_SERVER_ERROR)
